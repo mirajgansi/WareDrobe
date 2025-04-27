@@ -1,59 +1,85 @@
 "use client"
 import React, { useEffect, useState } from 'react';
-import styles from './card.module.css'; // Ensure you have this CSS file
 import DeleteIcon from '@mui/icons-material/Delete';
+import api from '../utlis/api';
 
-interface Image {
+type  Dress = {
   id: number;
-  title: string;
-  url: string;
-  thumbnailUrl: string;
-}
+  name: string;
+  date: string;
+  comment?: string;
+  category?: string;
+  season?: string;
+  brand?: string;
+  occasion?: string;
+  last_worn_date?: string;
+  times_worn?: number;
+  favorite?: boolean;
+  dressimage: string;
+};
 
 const AddDress = () => {
- const [images, setImages]= useState<Image[]>([]);
+  const [dresses, setDresses] = useState<Dress[]>([]);
  useEffect(()=>{
-    const fetchImages=async () =>{
-      try{
-        const res = await fetch('https://jsonplaceholder.typicode.com/photos');
-        const data:Image[]= await res.json();
-        setImages(data);} catch(error){
-          console.error(error);          
-        }
-      };
-      fetchImages();
-    },[]);
+  const fetchDress= async ()=> {
+    try{
+    const response = await api.get("dress/");
+    setDresses( response.data);
+  }
+  catch(error){
+    console.log("Error fetching Dresses")
+  }
+  };
+  fetchDress();
+ },[]);
 
-    const handleDelete = async (id : number)=>{
-      try{
-      const res= await fetch(`https://jsonplaceholder.typicode.com/photos/${id}`,{
-          method:"DELETE",
-        });
-       if(!res.ok){
-        throw new Error('this is my ${id');
-       }
-       console.log(`delete image with id ${id}`)
+    // const handleDelete = async (id : number)=>{
+    //   try{
+    //     alert
+    //   const res= await fetch(`https://jsonplaceholder.typicode.com/photos/${id}`,{
+    //       method:"DELETE",
+    //     });
+    //    if(!res.ok){
+    //     throw new Error('this is my ${id');
+    //    }
+    //    console.log(`delete image with id ${id}`)
 
-       setImages((prevImages)=> prevImages.filter((img)=>img.id !==id))
-      }catch(error){
-        console.error("error ",error);
-      }
-    };
+    //    setDress((prevImages)=> prevImages.filter((img)=>img.id !==id))
+    //   }catch(error){
+    //     console.error("error ",error);
+    //   }
+    // };
 
   return (
-    <div className=' p-4 flex flex-wrap gap-6 justify-center'>
-      {images.map((img) => (
-        <div key={img.id} className={styles.card}>
-          <img src={img.thumbnailUrl} alt={img.title} className="w-full rounded-xl" />
-          <div className="pt-2">
-            <h2 className="text-2xl font-roboto">{img.title}</h2>
-            <h4 className='text-sm font-roboto text-gray-500'>Date</h4>
-            <button  onClick={()=> handleDelete(img.id) } className="bg-red-500 hover:bg-red-700 text-white font-bold cursor-pointer ">
-              <DeleteIcon /> </button>
+    <div className=' p-4 flex flex-wrap gap-6 justify-center '>
+      {dresses.map((dress)=>(
+        <div key={dress.name} className="card card-side bg-red-100 shadow-sm'">
+          <img src={`http://localhost:3000/${dress.dressimage}`} alt={dress.name} className="w-full rounded-xl" />
+          <div className="card-body">
+            <h2 className="card-title">{dress.name}</h2>
+            <h4 className='text-sm font-roboto text-gray-500'>{dress.date}</h4>
+            
+            <button  onClick={()=>{const modal=document.getElementById(`img.id.toString()`)as HTMLDialogElement;
+            modal?.showModal();
+          console.log("hi")}}
+             className="btn btn-secondary"><DeleteIcon/> </button>
+              <dialog id={`img.id.toString()`}className='modal' >
+                <div className='modal-box'>
+                <form method="dialog">
+      <button className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
+    </form>                  <h3 className='font-bold text-lg'> Are you sure?</h3>
+                  <p className='py-4'>press yes to delete your dress</p>
+                  <div className='modal-action'>
+                    <form method='dialog'>
+                      {/* <button className='btn btn-error btn-outline  ' onClick={()=>handleDelete(img.id) }>yes</button> */}
+           </form>
+                  </div>
+                </div>
+              </dialog>
+
           </div>
         </div>
-      ))}
-
+))}
     </div>
   );
 };

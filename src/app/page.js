@@ -1,13 +1,11 @@
+// pages/index.js
 import Head from 'next/head'
 import Link from 'next/link'
-import styles from './styles/Home.module.css'
-
+import styles from '../styles/Home.module.css'
 
 export default function Home() {
   return (
-      <div >
-       
-   <div className={styles.container}>
+    <div className={styles.container}>
       <Head>
         <title>Wardrobe Management</title>
         <meta name="description" content="Manage your wardrobe easily!" />
@@ -23,24 +21,24 @@ export default function Home() {
         <section className={styles.card}>
           <h2>Your Wardrobe</h2>
           <p>View, add, or update your wardrobe items.</p>
-          <Link href="/wardrobe"  className={styles.button}>
-             Go to Wardrobe
+          <Link href="/wardrobe">
+            <a className={styles.button}>Go to Wardrobe</a>
           </Link>
         </section>
 
         <section className={styles.card}>
           <h2>Categories</h2>
           <p>Explore items by category: Shirts, Pants, Dresses, and more!</p>
-          <Link href="/categories"  className={styles.button} >
-          View Categories
+          <Link href="/categories">
+            <a className={styles.button}>View Categories</a>
           </Link>
         </section>
 
         <section className={styles.card}>
           <h2>Inventory</h2>
           <p>Track your wardrobe inventory and keep it up to date.</p>
-          <Link href="/inventory"  className={styles.button}  >
-            Manage Inventory
+          <Link href="/inventory">
+            <a className={styles.button}>Manage Inventory</a>
           </Link>
         </section>
       </main>
@@ -48,7 +46,6 @@ export default function Home() {
       <footer className={styles.footer}>
         <p>Created by Your Name</p>
       </footer>
-    </div>
     </div>
   )
 }
