@@ -45,8 +45,16 @@ const AddForm = () => {
     }
   };
   
+const seasons=["Summer", "Winter"];
+  
+  const handelSeasonSelection= (season)=>{
+    setDress((prev)=>({
+      ...prev,
+      season:season,
+    }))
+  }
 
-  const handleSubmit = async (e: React.FormEvent) => {
+const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     try {
@@ -120,7 +128,26 @@ const AddForm = () => {
             required
           />
 
-          <input
+         
+        <div className="dropdown dropdown-hover">
+          <div tabIndex={0} role="button" className="btn btn-outline m-1 w-52 justify-between">
+            {Newdress.season || 'Select Season'}
+            <svg className="ml-2 h-4 w-4 fill-current" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+              <path d="M5.516 7.548L10 12.032l4.484-4.484-1.032-1.032L10 9.968 6.548 6.516z"/>
+            </svg>
+          </div>
+
+          <ul tabIndex={0} className="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52">
+            {seasons.map((s) => (
+              <li key={s} onClick={() => handelSeasonSelection(s)} className="hover:bg-neutral hover:text-white cursor-pointer rounded px-2 py-1">
+                {s}
+              </li>
+            ))}
+          </ul>
+        </div>
+
+
+        <input
             type="text"
             name="comment"
             placeholder="Comments (*optional)"
@@ -128,8 +155,7 @@ const AddForm = () => {
             onChange={handleAdd}
             className="input input-bordered w-full"
           />
-
-          <input
+                  <input
             type="file"
             accept="image/*"
             onChange={handleImageChange}
@@ -142,6 +168,7 @@ const AddForm = () => {
               <img src={preview} alt="Preview" className="w-full max-h-64 object-cover rounded-lg border" />
             </div>
           )}
+          
 
           <button type="submit" className="btn btn-success w-full">
             Submit

@@ -1,8 +1,8 @@
 "use client"
 import React, { useEffect, useState } from 'react';
 import DeleteIcon from '@mui/icons-material/Delete';
-import api from '../utlis/api';
-
+import api, { deleteDress } from '../utlis/api';
+import Image from 'next/image';
 type  Dress = {
   id: number;
   name: string;
@@ -33,32 +33,43 @@ const AddDress = () => {
   fetchDress();
  },[]);
 
-    // const handleDelete = async (id : number)=>{
-    //   try{
-    //     alert
-    //   const res= await fetch(`https://jsonplaceholder.typicode.com/photos/${id}`,{
-    //       method:"DELETE",
-    //     });
-    //    if(!res.ok){
-    //     throw new Error('this is my ${id');
-    //    }
-    //    console.log(`delete image with id ${id}`)
+ const handleDelete = async (id: number) => {
+  try {
+    const res = await deleteDress(id)
+    
+    if (!res) {
+      throw new Error(`Error deleting dress with id: ${id}`);
+    }
 
-    //    setDress((prevImages)=> prevImages.filter((img)=>img.id !==id))
-    //   }catch(error){
-    //     console.error("error ",error);
-    //   }
-    // };
+    // On success
+    console.log(`Successfully deleted dress with id: ${id}`);
+    setDresses(prevDresses => prevDresses.filter(dress => dress.id !== id));
+  } catch (error) {
+    console.error("Error:", error);
+  }
+
+};
+
 
   return (
     <div className=' p-4 flex flex-wrap gap-6 justify-center '>
       {dresses.map((dress)=>(
-        <div key={dress.name} className="card card-side bg-red-100 shadow-sm'">
-          <img src={`http://localhost:3000/${dress.dressimage}`} alt={dress.name} className="w-full rounded-xl" />
+        <div key={dress.id}  className="card card-side bg-red-100 shadow-lg rounded-lg overflow-hidden w-80">
+           <figure>
+                <Image
+          src={dress.dressimage ? `http://localhost:5000/${dress.dressimage}` : "/fallback-image.png"}
+          width={400} height={400}
+          alt={dress.name || "Fallback Dress"}
+          className="w-full rounded-xl"
+          onError={(e) => {
+            const target = e.target as HTMLImageElement;
+            target.src = "/fallback-image.png";
+          }}
+/>
+        </figure>
           <div className="card-body">
             <h2 className="card-title">{dress.name}</h2>
             <h4 className='text-sm font-roboto text-gray-500'>{dress.date}</h4>
-            
             <button  onClick={()=>{const modal=document.getElementById(`img.id.toString()`)as HTMLDialogElement;
             modal?.showModal();
           console.log("hi")}}
@@ -71,7 +82,7 @@ const AddDress = () => {
                   <p className='py-4'>press yes to delete your dress</p>
                   <div className='modal-action'>
                     <form method='dialog'>
-                      {/* <button className='btn btn-error btn-outline  ' onClick={()=>handleDelete(img.id) }>yes</button> */}
+                      <button className='btn btn-error btn-outline  ' onClick={()=>handleDelete(dress.id) }>yes</button>
            </form>
                   </div>
                 </div>

@@ -9,7 +9,8 @@ const api = axios.create({
 
 export const addDress=()=>api.post("/add");
 export const getAllDress=()=> api.get('/');
-export const getDressByName=()=> api.get(`/name/${id}`)
-export const deleteDress=()=> api.delete(`${id}`);;
-
+// export const getDressByName=()=> api.get(`/name/${id}`)
+export const deleteDress = (id: number) => {
+  return api.delete(`/dress/${id}`);
+};
 export default api;
