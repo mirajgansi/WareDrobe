@@ -5,6 +5,8 @@ import api, { deleteDress } from '../utlis/api';
 import Image from 'next/image';
 import StarIcon from '@mui/icons-material/Star';
 import StarBorderIcon from '@mui/icons-material/StarBorder';
+import AlertMessage from './alertMessage';
+import { Warning } from '@mui/icons-material';
 
 type Dress = {
   id: number;
@@ -55,7 +57,7 @@ const AddDress = () => {
     try {
       const formData = new FormData();
       formData.append("favorite", updatedFavorite.toString());
-
+      
       await api.put(`/dress/${id}`, formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
@@ -66,15 +68,31 @@ const AddDress = () => {
           dress.id === id ? { ...dress, favorite: updatedFavorite } : dress
         )
       );
+      if(currentFavorite){
+          setAlertType('warning');
+          setAlertMessage('Dress is removed from favorite!')
+      }
+      else{
+        setAlertType('success');
+        setAlertMessage('Dress is marked as favorite!')      
+      }
+      setshowSuccess(true)
+      
+      setTimeout(()=>setshowSuccess(false),3000);
     } catch (error) {
       console.error("Failed to update favorite:", error);
     }
   };
 
+  const [showSuccess, setshowSuccess]=useState(false);
+  const[alertType,setAlertType]=useState<'success'|'warning'>('success');
+  const[alertMessage, setAlertMessage]=useState('');
+
   return (
+    <div>
     <div className='p-4 flex flex-wrap gap-6 justify-center'>
       {dresses.map((dress) => (
-        <div key={dress.id} className="card card-side bg-red-100 shadow-lg rounded-lg overflow-hidden w-80">
+        <div key={dress.id} className="card card-side bg-red-900 shadow-lg rounded-lg overflow-hidden w-80">
           <figure>
             <Image
               src={dress.dressimage ? `http://localhost:5000/${dress.dressimage}` : "/fallback-image.png"}
@@ -88,11 +106,10 @@ const AddDress = () => {
               }}
             />
           </figure>
-
           <div className="card-body">
             <button
-              className='text-orange-300'
-              onClick={() => toggleFavorite(dress.id, dress.favorite)}
+            className="ml-20 text-orange-400"
+            onClick={() => toggleFavorite(dress.id, dress.favorite)}
             >
               {dress.favorite ? <StarIcon /> : <StarBorderIcon />}
             </button>
@@ -127,7 +144,12 @@ const AddDress = () => {
           </div>
         </div>
       ))}
+       
     </div>
+    {showSuccess && <AlertMessage message={alertMessage} type={alertType}/>}
+
+    </div>
+    
   );
 };
 
