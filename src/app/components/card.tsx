@@ -40,16 +40,37 @@ const AddDress = () => {
 
   const handleDelete = async (id: number) => {
     try {
+      const deletedDress= dresses.find(dress=>dress.id===id);
+      if(!deletedDress) return;
+
+
       const res = await deleteDress(id);
       if (!res) throw new Error(`Error deleting dress with id: ${id}`);
 
+      setPreviousDeletedDress(deletedDress)
       setDresses(prev => prev.filter(dress => dress.id !== id));
     } catch (error) {
       console.error("Error:", error);
     }
-  };
+    if(handleDelete){
+      setAlertType('warning');
+      setAlertMessage('Your have deleted your dress')
+  }
+  else{
+    setAlertType('success');
+    setAlertMessage('Dress is marked as favorite!')      
+  }
+  setshowSuccess(true)
+  setTimeout(()=>setshowSuccess(false),3000);
+} 
+  
 
 
+  const [showSuccess, setshowSuccess]=useState(false);
+  const[alertType,setAlertType]=useState<'success'|'warning'>('success');
+  const[alertMessage, setAlertMessage]=useState('');
+  const [previousState, setPreviousState] = useState<{ id: number; favorite: boolean ; } | null>(null);
+  const [previousDeletedDress, setPreviousDeletedDress ]= useState<Dress| null>(null);
 
   const toggleFavorite = async (id: number, currentFavorite: boolean | undefined) => {
     const updatedFavorite = !currentFavorite;
@@ -57,7 +78,7 @@ const AddDress = () => {
     try {
       const formData = new FormData();
       formData.append("favorite", updatedFavorite.toString());
-      
+      setPreviousState({id, favorite:currentFavorite??false})
       await api.put(`/dress/${id}`, formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
@@ -84,10 +105,54 @@ const AddDress = () => {
     }
   };
 
-  const [showSuccess, setshowSuccess]=useState(false);
-  const[alertType,setAlertType]=useState<'success'|'warning'>('success');
-  const[alertMessage, setAlertMessage]=useState('');
-
+  const handleUndo = async () => {
+    if (!previousState) return;
+  
+    const { id, favorite } = previousState;
+  
+    const formData = new FormData();
+    formData.append("favorite", favorite.toString());
+  
+    try {
+      await api.put(`/dress/${id}`, formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+  
+      setDresses(prev =>
+        prev.map(dress =>
+          dress.id === id ? { ...dress, favorite } : dress
+        )
+      );
+  
+      setPreviousState(null);
+    } catch (error) {
+      console.error("Undo failed:", error);
+    }
+  };
+  const handleUndoDelete = async () => {
+    if (!previousDeletedDress) return;
+  
+    const formData = new FormData();
+    Object.entries(previousDeletedDress).forEach(([key, value]) => {
+      if (value !== undefined && value !== null) {
+        formData.append(key, value.toString());
+      }
+    });
+  
+    try {
+      await api.post('/dress/add', formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+  
+      // Restore in state
+      setDresses(prev => [...prev, previousDeletedDress]);
+      setPreviousDeletedDress(null);
+    } catch (error) {
+      console.error("Undo delete failed:", error);
+    }
+  };
+  
+  
   return (
     <div>
     <div className='p-4 flex flex-wrap gap-6 justify-center'>
@@ -146,8 +211,14 @@ const AddDress = () => {
       ))}
        
     </div>
-    {showSuccess && <AlertMessage message={alertMessage} type={alertType}/>}
-
+    {showSuccess && <AlertMessage message={alertMessage} type={alertType} onUndo={handleUndo}/>}
+    {previousDeletedDress && (
+  <AlertMessage 
+    message="Dress deleted." 
+    type="warning" 
+    onUndo={handleUndoDelete} 
+  />
+)}
     </div>
     
   );
