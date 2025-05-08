@@ -10,7 +10,7 @@ const api = axios.create({
 export const addDress=()=>api.post("/add");
 export const getAllDress=()=> api.get('/');
 export const updateDress=()=>api.put('/:id')
-// export const getDressByName=()=> api.get(`/name/${id}`)
+export const getDressById=()=> api.get('/:id')
 export const deleteDress = (id: number) => {
   return api.delete(`/dress/${id}`);
 };

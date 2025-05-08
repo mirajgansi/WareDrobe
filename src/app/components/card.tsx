@@ -1,31 +1,33 @@
 "use client";
 import React, { useEffect, useState } from 'react';
 import DeleteIcon from '@mui/icons-material/Delete';
+import { Dress } from '../utlis/dress'
 import api, { deleteDress } from '../utlis/api';
 import Image from 'next/image';
 import StarIcon from '@mui/icons-material/Star';
 import StarBorderIcon from '@mui/icons-material/StarBorder';
 import AlertMessage from './alertMessage';
-import { Warning } from '@mui/icons-material';
+import  { useRouter } from 'next/navigation';
 
-type Dress = {
-  id: number;
-  name: string;
-  date: string;
-  comment?: string;
-  category?: string;
-  season?: string;
-  brand?: string;
-  occasion?: string;
-  last_worn_date?: string;
-  times_worn?: number;
-  favorite?: boolean;
-  dressimage: string;
-};
+// export interface Dress  {
+//   id: number;
+//   name: string;
+//   date: string;
+//   comment?: string;
+//   category?: string;
+//   season?: string;
+//   brand?: string;
+//   occasion?: string;
+//   last_worn_date?: string;
+//   times_worn?: number;
+//   favorite?: boolean;
+//   dressimage: string;
+//   [key: string]:any;
+// };
 
-const AddDress = () => {
+const Cards = ({ id,name, date, comment, category, season, brand, occasion, last_worn_date, times_worn, favorite, dressimage}:Dress) => {
+  const router = useRouter();
   const [dresses, setDresses] = useState<Dress[]>([]);
-
   useEffect(() => {
     const fetchDress = async () => {
       try {
@@ -37,6 +39,11 @@ const AddDress = () => {
     };
     fetchDress();
   }, []);
+  const [showSuccess, setshowSuccess]=useState(false);
+  const[alertType,setAlertType]=useState<'success'|'warning'>('success');
+  const[alertMessage, setAlertMessage]=useState('');
+  const [previousState, setPreviousState] = useState<{ id: number; favorite: boolean ; } | null>(null);
+  const [previousDeletedDress, setPreviousDeletedDress ]= useState<Dress| null>(null);
 
   const handleDelete = async (id: number) => {
     try {
@@ -52,25 +59,9 @@ const AddDress = () => {
     } catch (error) {
       console.error("Error:", error);
     }
-    if(handleDelete){
-      setAlertType('warning');
-      setAlertMessage('Your have deleted your dress')
-  }
-  else{
-    setAlertType('success');
-    setAlertMessage('Dress is marked as favorite!')      
-  }
   setshowSuccess(true)
   setTimeout(()=>setshowSuccess(false),3000);
 } 
-  
-
-
-  const [showSuccess, setshowSuccess]=useState(false);
-  const[alertType,setAlertType]=useState<'success'|'warning'>('success');
-  const[alertMessage, setAlertMessage]=useState('');
-  const [previousState, setPreviousState] = useState<{ id: number; favorite: boolean ; } | null>(null);
-  const [previousDeletedDress, setPreviousDeletedDress ]= useState<Dress| null>(null);
 
   const toggleFavorite = async (id: number, currentFavorite: boolean | undefined) => {
     const updatedFavorite = !currentFavorite;
@@ -144,20 +135,19 @@ const AddDress = () => {
         headers: { "Content-Type": "multipart/form-data" },
       });
   
-      // Restore in state
       setDresses(prev => [...prev, previousDeletedDress]);
       setPreviousDeletedDress(null);
     } catch (error) {
       console.error("Undo delete failed:", error);
     }
   };
-  
-  
+
   return (
     <div>
-    <div className='p-4 flex flex-wrap gap-6 justify-center'>
+    <div className='p-4 flex flex-wrap gap-6 justify-center '>
       {dresses.map((dress) => (
-        <div key={dress.id} className="card card-side bg-red-900 shadow-lg rounded-lg overflow-hidden w-80">
+        <div key={dress.id} className="card card-side bg-base-300 shadow-lg rounded-lg overflow-hidden w-80 cursor-pointer hover:bg-black-900"
+         onClick={()=>router.push(`/cardDetail/${dress.id}`)}>
           <figure>
             <Image
               src={dress.dressimage ? `http://localhost:5000/${dress.dressimage}` : "/fallback-image.png"}
@@ -174,7 +164,8 @@ const AddDress = () => {
           <div className="card-body">
             <button
             className="ml-20 text-orange-400"
-            onClick={() => toggleFavorite(dress.id, dress.favorite)}
+            onClick={(e) =>{e.stopPropagation();
+               toggleFavorite(dress.id, dress.favorite)}}
             >
               {dress.favorite ? <StarIcon /> : <StarBorderIcon />}
             </button>
@@ -183,7 +174,8 @@ const AddDress = () => {
             <h4 className='text-sm font-roboto text-gray-500'>{dress.date}</h4>
 
             <button
-              onClick={() => {
+              onClick={(e) => {
+                e.stopPropagation();
                 const modal = document.getElementById(`modal-${dress.id}`) as HTMLDialogElement;
                 modal?.showModal();
               }}
@@ -214,9 +206,8 @@ const AddDress = () => {
     {showSuccess && <AlertMessage message={alertMessage} type={alertType} onUndo={handleUndo}/>}
     {previousDeletedDress && (
   <AlertMessage 
-    message="Dress deleted." 
-    type="warning" 
-    onUndo={handleUndoDelete} 
+    message={alertMessage} 
+    type={alertType}    onUndo={handleUndoDelete} 
   />
 )}
     </div>
@@ -224,4 +215,5 @@ const AddDress = () => {
   );
 };
 
-export default AddDress;
+export default Cards;
+

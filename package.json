@@ -23,6 +23,7 @@
     "@tailwindcss/postcss": "^4",
     "@types/node": "22.13.14",
     "@types/react": "19.0.12",
+    "@types/react-router-dom": "^5.3.3",
     "daisyui": "^5.0.12",
     "eslint": "^9",
     "eslint-config-next": "15.2.4",
